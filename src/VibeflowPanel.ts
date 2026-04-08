@@ -57,7 +57,7 @@ export class VibeflowPanel {
   }
 
   private async _handleMessage(message: VibeMessage) {
-    const config = vscode.workspace.getConfiguration('vibeflow');
+    const config = vscode.workspace.getConfiguration('vibeflow-orch');
     const openRouterKey = config.get<string>('openRouterKey') || '';
     const perplexityKey = config.get<string>('perplexityKey') || '';
 

@@ -2,7 +2,7 @@
   "name": "vibeflow-orch",
   "displayName": "VibeFlow Orch — AI Workflow Builder",
   "description": "Describe workflows in plain English. AI builds, runs, and self-heals Python automation scripts. By Virgil Junior Adoleyine 🇬🇭",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "publisher": "vibeflow",
   "icon": "media/icon.png",
   "engines": { "vscode": "^1.85.0" },
