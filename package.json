@@ -1,0 +1,145 @@
+{
+  "name": "vibeflow",
+  "displayName": "VibeFlow — AI Workflow Builder",
+  "description": "Describe workflows in plain English. AI builds, runs, and self-heals Python automation scripts. By Virgil Junior Adoleyine 🇬🇭",
+  "version": "1.0.0",
+  "publisher": "VirgilAdoleyine",
+  "icon": "media/icon.png",
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["AI", "Machine Learning", "Other"],
+  "keywords": ["workflow", "automation", "ai", "claude", "gemini", "python", "langchain", "vibeflow"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/VirgilAdoleyine/vibeflow-extension"
+  },
+  "activationEvents": ["onCommand:vibeflow.open", "onStartupFinished"],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "vibeflow.open",
+        "title": "VibeFlow: Open Workflow Builder",
+        "icon": "$(zap)"
+      },
+      {
+        "command": "vibeflow.newWorkflow",
+        "title": "VibeFlow: New Workflow from Prompt"
+      },
+      {
+        "command": "vibeflow.searchModels",
+        "title": "VibeFlow: Search Best AI Models for Task"
+      },
+      {
+        "command": "vibeflow.checkRegulations",
+        "title": "VibeFlow: Check Workflow Regulations"
+      },
+      {
+        "command": "vibeflow.generateFiles",
+        "title": "VibeFlow: Generate .py + .env.local + README"
+      },
+      {
+        "command": "vibeflow.syncRepos",
+        "title": "VibeFlow: Sync Cloud + Community Repos"
+      },
+      {
+        "command": "vibeflow.contributeRegGuard",
+        "title": "VibeFlow: Contribute to RegGuard ⭐"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "vibeflow.open",
+          "group": "navigation",
+          "when": "resourceExtname == .py || resourceExtname == .ts"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "VibeFlow",
+      "properties": {
+        "vibeflow.openRouterKey": {
+          "type": "string",
+          "description": "Your OpenRouter API key. Get one at openrouter.ai",
+          "secret": true
+        },
+        "vibeflow.defaultModel": {
+          "type": "string",
+          "default": "anthropic/claude-sonnet-4-5",
+          "description": "Default AI model (searched via Perplexity)"
+        },
+        "vibeflow.perplexityKey": {
+          "type": "string",
+          "description": "Perplexity API key for model search + regulation scanning",
+          "secret": true
+        },
+        "vibeflow.e2bApiKey": {
+          "type": "string",
+          "description": "E2B sandbox API key",
+          "secret": true
+        },
+        "vibeflow.composioApiKey": {
+          "type": "string",
+          "description": "Composio API key for 400+ OAuth integrations",
+          "secret": true
+        },
+        "vibeflow.inngestSigningKey": {
+          "type": "string",
+          "description": "Inngest signing key",
+          "secret": true
+        },
+        "vibeflow.inngestEventKey": {
+          "type": "string",
+          "description": "Inngest event key",
+          "secret": true
+        },
+        "vibeflow.neonDatabaseUrl": {
+          "type": "string",
+          "description": "Neon Postgres database URL",
+          "secret": true
+        },
+        "vibeflow.upstashRedisUrl": {
+          "type": "string",
+          "description": "Upstash Redis URL",
+          "secret": true
+        },
+        "vibeflow.upstashRedisToken": {
+          "type": "string",
+          "description": "Upstash Redis token",
+          "secret": true
+        },
+        "vibeflow.userGitHubRepo": {
+          "type": "string",
+          "description": "Your personal/cloud GitHub repo URL (origin)"
+        },
+        "vibeflow.communityGitRepo": {
+          "type": "string",
+          "description": "VibeFlow community repo URL"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "node esbuild.config.mjs --production && cd webview && npm run build",
+    "watch": "node esbuild.config.mjs --watch",
+    "watch:webview": "cd webview && npm run dev",
+    "lint": "eslint src --ext ts",
+    "package": "vsce package",
+    "publish": "vsce publish && ovsx publish"
+  },
+  "dependencies": {
+    "@langchain/openai": "^0.3.0",
+    "langchain": "^0.3.0",
+    "node-fetch": "^3.3.2",
+    "simple-git": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^2.24.0",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.3.0",
+    "ovsx": "^0.9.0"
+  }
+}

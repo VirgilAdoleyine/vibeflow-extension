@@ -1,0 +1,13 @@
+node_modules/
+dist/
+out/
+*.vsix
+.env
+.env.local
+.vscode-test/
+**/*.map
+.idea/
+.venv/
+__pycache__/
+*.pyc
+.gemini/
