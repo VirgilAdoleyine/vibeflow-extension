@@ -1,55 +1,55 @@
 {
-  "name": "vibeflow-ext",
-  "displayName": "VibeFlow — AI Workflow Builder",
+  "name": "vibeflow-orch",
+  "displayName": "VibeFlow Orch — AI Workflow Builder",
   "description": "Describe workflows in plain English. AI builds, runs, and self-heals Python automation scripts. By Virgil Junior Adoleyine 🇬🇭",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "publisher": "vibeflow",
   "icon": "media/icon.png",
   "engines": { "vscode": "^1.85.0" },
   "categories": ["AI", "Machine Learning", "Other"],
-  "keywords": ["workflow", "automation", "ai", "claude", "gemini", "python", "langchain", "vibeflow-ext"],
+  "keywords": ["workflow", "automation", "ai", "claude", "gemini", "python", "langchain", "vibeflow-orch", "orchestration"],
   "repository": {
     "type": "git",
-    "url": "https://github.com/VirgilAdoleyine/vibeflow-ext-extension"
+    "url": "https://github.com/VirgilAdoleyine/vibeflow-orchension"
   },
-  "activationEvents": ["onCommand:vibeflow-ext-ext.open", "onStartupFinished"],
+  "activationEvents": ["onCommand:vibeflow-orch.open", "onStartupFinished"],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "vibeflow-ext.open",
+        "command": "vibeflow-orch.open",
         "title": "VibeFlow: Open Workflow Builder",
         "icon": "$(zap)"
       },
       {
-        "command": "vibeflow-ext.newWorkflow",
+        "command": "vibeflow-orch.newWorkflow",
         "title": "VibeFlow: New Workflow from Prompt"
       },
       {
-        "command": "vibeflow-ext.searchModels",
+        "command": "vibeflow-orch.searchModels",
         "title": "VibeFlow: Search Best AI Models for Task"
       },
       {
-        "command": "vibeflow-ext.checkRegulations",
+        "command": "vibeflow-orch.checkRegulations",
         "title": "VibeFlow: Check Workflow Regulations"
       },
       {
-        "command": "vibeflow-ext.generateFiles",
+        "command": "vibeflow-orch.generateFiles",
         "title": "VibeFlow: Generate .py + .env.local + README"
       },
       {
-        "command": "vibeflow-ext.syncRepos",
+        "command": "vibeflow-orch.syncRepos",
         "title": "VibeFlow: Sync Cloud + Community Repos"
       },
       {
-        "command": "vibeflow-ext.contributeRegGuard",
+        "command": "vibeflow-orch.contributeRegGuard",
         "title": "VibeFlow: Contribute to RegGuard ⭐"
       }
     ],
     "menus": {
       "editor/title": [
         {
-          "command": "vibeflow-ext.open",
+          "command": "vibeflow-orch.open",
           "group": "navigation",
           "when": "resourceExtname == .py || resourceExtname == .ts"
         }
@@ -58,61 +58,61 @@
     "configuration": {
       "title": "VibeFlow",
       "properties": {
-        "vibeflow-ext.openRouterKey": {
+        "vibeflow-orch.openRouterKey": {
           "type": "string",
           "description": "Your OpenRouter API key. Get one at openrouter.ai",
           "secret": true
         },
-        "vibeflow-ext.defaultModel": {
+        "vibeflow-orch.defaultModel": {
           "type": "string",
           "default": "anthropic/claude-sonnet-4-5",
           "description": "Default AI model (searched via Perplexity)"
         },
-        "vibeflow-ext.perplexityKey": {
+        "vibeflow-orch.perplexityKey": {
           "type": "string",
           "description": "Perplexity API key for model search + regulation scanning",
           "secret": true
         },
-        "vibeflow-ext.e2bApiKey": {
+        "vibeflow-orch.e2bApiKey": {
           "type": "string",
           "description": "E2B sandbox API key",
           "secret": true
         },
-        "vibeflow-ext.composioApiKey": {
+        "vibeflow-orch.composioApiKey": {
           "type": "string",
           "description": "Composio API key for 400+ OAuth integrations",
           "secret": true
         },
-        "vibeflow-ext.inngestSigningKey": {
+        "vibeflow-orch.inngestSigningKey": {
           "type": "string",
           "description": "Inngest signing key",
           "secret": true
         },
-        "vibeflow-ext.inngestEventKey": {
+        "vibeflow-orch.inngestEventKey": {
           "type": "string",
           "description": "Inngest event key",
           "secret": true
         },
-        "vibeflow-ext.neonDatabaseUrl": {
+        "vibeflow-orch.neonDatabaseUrl": {
           "type": "string",
           "description": "Neon Postgres database URL",
           "secret": true
         },
-        "vibeflow-ext.upstashRedisUrl": {
+        "vibeflow-orch.upstashRedisUrl": {
           "type": "string",
           "description": "Upstash Redis URL",
           "secret": true
         },
-        "vibeflow-ext.upstashRedisToken": {
+        "vibeflow-orch.upstashRedisToken": {
           "type": "string",
           "description": "Upstash Redis token",
           "secret": true
         },
-        "vibeflow-ext.userGitHubRepo": {
+        "vibeflow-orch.userGitHubRepo": {
           "type": "string",
           "description": "Your personal/cloud GitHub repo URL (origin)"
         },
-        "vibeflow-ext.communityGitRepo": {
+        "vibeflow-orch.communityGitRepo": {
           "type": "string",
           "description": "VibeFlow community repo URL"
         }

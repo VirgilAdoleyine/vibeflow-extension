@@ -7,7 +7,7 @@ export function activate(context: vscode.ExtensionContext) {
     console.log('VibeFlow activated — AI Workflow Builder by Virgil Junior Adoleyine 🇬🇭');
 
     // Show welcome notification on first install
-    const hasShownWelcome = context.globalState.get('vibeflow-ext.welcomeShown');
+    const hasShownWelcome = context.globalState.get('vibeflow-orch.welcomeShown');
     if (!hasShownWelcome) {
       vscode.window.showInformationMessage(
         '⚡ VibeFlow is ready! Describe a workflow in plain English and watch AI build it.',
@@ -15,17 +15,17 @@ export function activate(context: vscode.ExtensionContext) {
         'Star RegGuard ⭐'
       ).then(choice => {
         if (choice === 'Open VibeFlow') {
-          vscode.commands.executeCommand('vibeflow-ext.open');
+          vscode.commands.executeCommand('vibeflow-orch.open');
         } else if (choice === 'Star RegGuard ⭐') {
           vscode.env.openExternal(vscode.Uri.parse('https://github.com/VirgilAdoleyine/regguard'));
         }
       });
-      context.globalState.update('vibeflow-ext.welcomeShown', true);
+      context.globalState.update('vibeflow-orch.welcomeShown', true);
     }
 
     // Register all commands
     const commands = [
-      vscode.commands.registerCommand('vibeflow-ext.open', () => {
+      vscode.commands.registerCommand('vibeflow-orch.open', () => {
         try {
           VibeflowPanel.createOrShow(context);
         } catch (e: any) {
@@ -33,7 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
       }),
 
-      vscode.commands.registerCommand('vibeflow-ext.newWorkflow', async () => {
+      vscode.commands.registerCommand('vibeflow-orch.newWorkflow', async () => {
         const prompt = await vscode.window.showInputBox({
           prompt: 'Describe your workflow in plain English',
           placeHolder: 'e.g. Every morning, summarize my Gmail and post to Slack',
@@ -45,33 +45,33 @@ export function activate(context: vscode.ExtensionContext) {
         }
       }),
 
-      vscode.commands.registerCommand('vibeflow-ext.searchModels', () => {
+      vscode.commands.registerCommand('vibeflow-orch.searchModels', () => {
         VibeflowPanel.createOrShow(context);
         VibeflowPanel.currentPanel?.sendCommand('searchModels');
       }),
 
-      vscode.commands.registerCommand('vibeflow-ext.checkRegulations', () => {
+      vscode.commands.registerCommand('vibeflow-orch.checkRegulations', () => {
         VibeflowPanel.createOrShow(context);
         VibeflowPanel.currentPanel?.sendCommand('checkRegulations');
       }),
 
-      vscode.commands.registerCommand('vibeflow-ext.generateFiles', () => {
+      vscode.commands.registerCommand('vibeflow-orch.generateFiles', () => {
         VibeflowPanel.createOrShow(context);
         VibeflowPanel.currentPanel?.sendCommand('generateFiles');
       }),
 
-      vscode.commands.registerCommand('vibeflow-ext.syncRepos', async () => {
-        const config = vscode.workspace.getConfiguration('vibeflow-ext');
+      vscode.commands.registerCommand('vibeflow-orch.syncRepos', async () => {
+        const config = vscode.workspace.getConfiguration('vibeflow-orch');
         const originUrl = config.get<string>('userGitHubRepo');
         const communityUrl = config.get<string>('communityGitRepo');
         if (!originUrl || !communityUrl) {
-          vscode.window.showWarningMessage('Set vibeflow-ext.userGitHubRepo and vibeflow-ext.communityGitRepo in settings first.');
+          vscode.window.showWarningMessage('Set vibeflow-orch.userGitHubRepo and vibeflow-orch.communityGitRepo in settings first.');
           return;
         }
         await GitHelper.syncBothRemotes(originUrl, communityUrl);
       }),
 
-      vscode.commands.registerCommand('vibeflow-ext.contributeRegGuard', () => {
+      vscode.commands.registerCommand('vibeflow-orch.contributeRegGuard', () => {
         vscode.env.openExternal(vscode.Uri.parse('https://github.com/VirgilAdoleyine/regguard'));
         vscode.window.showInformationMessage(
           '⭐ Thank you! Star RegGuard and contribute to help devs ship compliant code faster.',
