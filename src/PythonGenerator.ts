@@ -260,10 +260,10 @@ a VS Code extension that helps devs ship faster without breaking regulations.
       envFile: envContent,
       readmeFile: readmeContent,
       dirStructure: [
-        \`workflows/\${dirName}/\`,
-        \`workflows/\${dirName}/agent.py\`,
-        \`workflows/\${dirName}/.env.local\`,
-        \`workflows/\${dirName}/README.md\`
+        `workflows/${dirName}/`,
+        `workflows/${dirName}/agent.py`,
+        `workflows/${dirName}/.env.local`,
+        `workflows/${dirName}/README.md`
       ]
     };
   }

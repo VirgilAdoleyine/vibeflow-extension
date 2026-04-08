@@ -19,15 +19,15 @@ export function ContributePanel({ vscode }: Props) {
       {/* Community Repo */}
       <Section title="🛠️ Developer / Self-Hosting" color="#34a853">
         <p>Fork, contribute, or self-host VibeFlow. Use the dual-remote workflow:</p>
-        <Code>{\`# Pull from both repos
+        <Code>{`# Pull from both repos
 git pull origin main && git pull community main
 
 # Push to both repos
 git push origin main && git push community main
 
 # Or do both at once
-git pull origin main && git pull community main && \\\\
-git push origin main && git push community main\`}</Code>
+git pull origin main && git pull community main && \
+git push origin main && git push community main`}</Code>
         <Btn label="Community Repo on GitHub" onClick={() => open('https://github.com/VirgilAdoleyine/vibeflow')} />
       </Section>
 
@@ -62,7 +62,7 @@ git push origin main && git push community main\`}</Code>
 
 function Section({ title, color, children }: { title: string; color: string; children: React.ReactNode }) {
   return (
-    <div style={{ marginBottom: 24, padding: 16, borderRadius: 8, border: \`1px solid \${color}22\`, background: \`\${color}08\` }}>
+    <div style={{ marginBottom: 24, padding: 16, borderRadius: 8, border: `1px solid ${color}22`, background: `${color}08` }}>
       <h3 style={{ color, marginTop: 0, marginBottom: 10, fontSize: 13 }}>{title}</h3>
       <div style={{ fontSize: 12, lineHeight: 1.6 }}>{children}</div>
     </div>
