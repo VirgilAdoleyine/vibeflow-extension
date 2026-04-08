@@ -84,7 +84,7 @@ export class VibeflowPanel {
         this._post({ command: 'status', text: '🔍 Searching best models via Perplexity...', stage: 'search' });
         const models = await ModelSearcher.search({
           task: message.prompt || 'general workflow automation',
-          perplexityKey
+          openRouterKey
         });
         this._post({ command: 'modelsFound', models });
         break;
@@ -94,7 +94,6 @@ export class VibeflowPanel {
         this._post({ command: 'status', text: '📋 Scanning global regulations...', stage: 'regulation' });
         const regulations = await RegulationChecker.scan({
           task: message.prompt || (this._currentWorkflow?.description || ''),
-          perplexityKey,
           openRouterKey
         });
         this._post({ command: 'regulationsFound', regulations });

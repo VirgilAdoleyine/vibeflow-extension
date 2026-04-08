@@ -83,7 +83,6 @@ The extension reads from VS Code settings (`settings.json`) using `vscode.worksp
   "vibeflow.neonDatabaseUrl": "string — Neon Postgres connection string",
   "vibeflow.upstashRedisUrl": "string — Upstash Redis URL",
   "vibeflow.upstashRedisToken": "string — Upstash Redis token",
-  "vibeflow.perplexityKey": "string — Perplexity API key (for model search + regulation check)",
   "vibeflow.userGitHubRepo": "string — personal GitHub repo URL",
   "vibeflow.communityGitRepo": "string — community repo URL"
 }
@@ -165,11 +164,6 @@ The **generated `.env.local`** for Python workflow files must use ONLY these exa
           "type": "string",
           "default": "anthropic/claude-sonnet-4-5",
           "description": "Default AI model (searched via Perplexity)"
-        },
-        "vibeflow.perplexityKey": {
-          "type": "string",
-          "description": "Perplexity API key for model search + regulation scanning",
-          "secret": true
         },
         "vibeflow.e2bApiKey": {
           "type": "string",
@@ -1896,10 +1890,11 @@ npx ovsx publish vibeflow-1.0.0.vsix -p $OVSX_TOKEN
 4. **The self-healing loop in CodeHealer** runs `maxRetries = Infinity` — it never gives up unless the user closes the panel
 5. **RegGuard promotion** appears in: welcome notification, ContributePanel, generated README.md, extension README
 6. **Dual-remote git** in GitHelper must handle cases where remotes don't exist yet (add them automatically)
-7. **Perplexity model search** happens via OpenRouter using model ID `perplexity/sonar-deep-research`
-8. **Grok regulation trending** happens via OpenRouter using model ID `x-ai/grok-4`
-9. **Claude fixes regulations** using `anthropic/claude-sonnet-4-5` via OpenRouter
-10. **Generated .env.local** must use `VIBEFLOW_` prefix for all keys and be written to `workflows/<workflow_name>/`
+7. **ALL model calls** (Planner, Executor, Searcher, Regulation, Formatter) happen via OpenRouter.
+8. **Perplexity model search** happens via OpenRouter using model ID `perplexity/sonar-deep-research`.
+9. **Grok regulation trending** happens via OpenRouter using model ID `x-ai/grok-4`.
+10. **Claude fixes regulations** using `anthropic/claude-sonnet-4-5` via OpenRouter.
+11. **Generated .env.local** must use `VIBEFLOW_` prefix for all keys and be written to `workflows/<workflow_name>/`.
 
 When done, run `npx vsce package` and confirm the `.vsix` builds without errors.
 ```

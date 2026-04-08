@@ -1,3 +1,5 @@
+import { openRouterChat } from './openrouter';
+
 export interface ModelResult {
   id: string;
   name: string;
@@ -9,33 +11,21 @@ export interface ModelResult {
 
 interface SearchOptions {
   task: string;
-  perplexityKey: string;
+  openRouterKey: string;
 }
 
 export class ModelSearcher {
   static async search(options: SearchOptions): Promise<ModelResult[]> {
-    const { task, perplexityKey } = options;
-
-    if (!perplexityKey) {
-        // Fallback to hardcoded sensible defaults if no key
-        return this.getDefaults();
-    }
+    const { task, openRouterKey } = options;
 
     try {
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${perplexityKey}`,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://vibeflow-cloud.vercel.app',
-          'X-Title': 'VibeFlow'
-        },
-        body: JSON.stringify({
-          model: 'perplexity/sonar-deep-research',
-          messages: [
-            {
-              role: 'user',
-              content: `Search OpenRouter's model catalog and list the TOP 5 most appropriate AI models for this task: "${task}".
+      const text = await openRouterChat({
+        apiKey: openRouterKey,
+        model: 'perplexity/sonar-deep-research',
+        messages: [
+          {
+            role: 'user',
+            content: `Search OpenRouter's model catalog and list the TOP 5 most appropriate AI models for this task: "${task}".
 
 For each model return:
 - OpenRouter model ID (exact slug like "anthropic/claude-sonnet-4-5")
@@ -45,13 +35,9 @@ For each model return:
 
 Return ONLY valid JSON array:
 [{"id":"...", "name":"...", "provider":"...", "strengths":["..."], "recommended":true/false, "openRouterSlug":"..."}]`
-            }
-          ]
-        })
+          }
+        ]
       });
-
-      const data = await response.json() as any;
-      const text = data.choices?.[0]?.message?.content || '[]';
 
       const clean = text.replace(/```json|```/g, '').trim();
       return JSON.parse(clean);
