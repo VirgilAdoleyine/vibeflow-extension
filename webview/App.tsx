@@ -11,6 +11,7 @@ import { RegulationPanel } from './components/RegulationPanel';
 import { FileExplorer } from './components/FileExplorer';
 import { ContributePanel } from './components/ContributePanel';
 import { Canvas } from './components/Canvas';
+import { NodeEditor } from './components/NodeEditor';
 import { WorkflowGraph, VibeMessage } from '../src/types';
 
 declare const acquireVsCodeApi: () => { postMessage: (msg: any) => void };
@@ -28,6 +29,7 @@ export default function App() {
   const [generatedFiles, setGeneratedFiles] = useState<any>(null);
   const [currentWorkflow, setCurrentWorkflow] = useState<WorkflowGraph | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
 
   const onConnect = useCallback((c: Connection) => setEdges(e => addEdge(c, e)), []);
 
@@ -52,6 +54,9 @@ export default function App() {
         case 'workflowComplete':
           setIsLoading(false);
           break;
+        case 'executionFinished':
+          setIsLoading(false);
+          break;
         case 'modelsFound':
           setModels(msg.models);
           setActiveTab('models');
@@ -71,15 +76,6 @@ export default function App() {
           addStatus(`❌ ${msg.text}`, 'error');
           setIsLoading(false);
           break;
-        case 'searchModels':
-          handleSearchModels();
-          break;
-        case 'checkRegulations':
-          handleRegulations();
-          break;
-        case 'generateFiles':
-          handleGenerateFiles();
-          break;
       }
     };
     window.addEventListener('message', handler);
@@ -90,7 +86,7 @@ export default function App() {
     const flowNodes: Node[] = workflow.nodes.map(n => ({
       id: n.id,
       position: n.position,
-      data: { label: `${getNodeEmoji(n.type)} ${n.label}` },
+      data: { label: `${getNodeEmoji(n.type)} ${n.label}`, type: n.type, app: n.app },
       style: getNodeStyle(n.type)
     }));
     const flowEdges: Edge[] = workflow.edges.map(([s, t], i) => ({
@@ -105,6 +101,21 @@ export default function App() {
     setIsLoading(true);
     addStatus(`📝 Processing: "${prompt}"`, 'input');
     vscode.postMessage({ command: 'buildWorkflow', prompt });
+  };
+
+  const handleRunWorkflow = () => {
+    if (!currentWorkflow) return;
+    setIsLoading(true);
+    vscode.postMessage({ command: 'runWorkflow', workflow: currentWorkflow });
+  };
+
+  const handleSetupComposio = () => {
+    vscode.postMessage({ command: 'setupComposio' });
+  };
+
+  const handleUpdateNode = (nodeId: string, data: any) => {
+    setNodes(nds => nds.map(n => n.id === nodeId ? { ...n, data } : n));
+    addStatus(`🛠️ Updated node: ${data.label}`, 'input');
   };
 
   const handleSearchModels = (prompt?: string) => {
@@ -163,13 +174,38 @@ export default function App() {
       {/* Content */}
       <div style={styles.content}>
         {activeTab === 'canvas' && (
-          <Canvas
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-          />
+          <>
+            <div style={styles.canvasToolbar}>
+              <button
+                onClick={handleRunWorkflow}
+                disabled={isLoading || nodes.length === 0}
+                style={{ ...styles.actionBtn, background: '#34a853' }}
+              >
+                ▶ Run Workflow
+              </button>
+              <button
+                onClick={handleSetupComposio}
+                style={{ ...styles.actionBtn, background: '#9c27b0' }}
+              >
+                🔌 Setup Composio Apps
+              </button>
+            </div>
+            <Canvas
+              nodes={nodes}
+              edges={edges}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onConnect={onConnect}
+              onNodeClick={(_e, node) => setSelectedNode(node)}
+            />
+            {selectedNode && (
+              <NodeEditor
+                node={selectedNode}
+                onSave={handleUpdateNode}
+                onClose={() => setSelectedNode(null)}
+              />
+            )}
+          </>
         )}
 
         {activeTab === 'models' && (
@@ -260,5 +296,13 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#00d4ff', background: 'rgba(0,212,255,0.05)'
   },
   content: { flex: 1, overflow: 'hidden', position: 'relative' },
-  statusFeed: { height: 120 }
+  canvasToolbar: {
+    position: 'absolute', top: 10, left: 10, zIndex: 10,
+    display: 'flex', gap: 8
+  },
+  actionBtn: {
+    padding: '6px 12px', borderRadius: 4, border: 'none',
+    color: '#fff', fontSize: 11, fontWeight: 700, cursor: 'pointer',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+  }
 };

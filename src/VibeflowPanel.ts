@@ -100,6 +100,30 @@ export class VibeflowPanel {
         break;
       }
 
+      case 'runWorkflow': {
+        this._post({ command: 'status', text: '🚀 Starting execution...', stage: 'executor' });
+        // In a real scenario, this would use E2B or a local child process.
+        // For now, we simulate execution and provide feedback.
+        try {
+          if (!message.workflow?.steps) throw new Error('No steps to run.');
+          for (const step of message.workflow.steps) {
+            this._post({ command: 'status', text: `🏃 Running: ${step}`, stage: 'executor' });
+            await new Promise(r => setTimeout(r, 1500)); // Simulate work
+          }
+          this._post({ command: 'status', text: '✅ Execution complete!', stage: 'complete' });
+          this._post({ command: 'executionFinished', success: true });
+        } catch (e: any) {
+          this._post({ command: 'error', text: e.message });
+        }
+        break;
+      }
+
+      case 'setupComposio': {
+        vscode.window.showInformationMessage('Opening Composio App Setup...');
+        vscode.env.openExternal(vscode.Uri.parse('https://app.composio.dev/apps'));
+        break;
+      }
+
       case 'generateFiles': {
         if (!this._currentWorkflow) {
           this._post({ command: 'error', text: 'Build a workflow first before generating files.' });

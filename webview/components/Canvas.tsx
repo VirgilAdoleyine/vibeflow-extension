@@ -11,9 +11,10 @@ interface Props {
   onNodesChange: OnNodesChange;
   onEdgesChange: OnEdgesChange;
   onConnect: OnConnect;
+  onNodeClick: (event: React.MouseEvent, node: Node) => void;
 }
 
-export function Canvas({ nodes, edges, onNodesChange, onEdgesChange, onConnect }: Props) {
+export function Canvas({ nodes, edges, onNodesChange, onEdgesChange, onConnect, onNodeClick }: Props) {
   return (
     <div style={styles.canvasWrap}>
       <ReactFlow
@@ -22,6 +23,7 @@ export function Canvas({ nodes, edges, onNodesChange, onEdgesChange, onConnect }
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onNodeClick={onNodeClick}
         fitView
       >
         <Background />
