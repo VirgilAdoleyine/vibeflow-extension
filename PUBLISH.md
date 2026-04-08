@@ -36,28 +36,38 @@ Ensure the extension is fully built and ready for production.
 
 ## 🚀 Step 2: Publish to VS Code Marketplace
 
-### 1. Create a Microsoft Account & Azure DevOps Org
-- Sign in to [Azure DevOps](https://dev.azure.com/).
-- Create a **Personal Access Token (PAT)**:
-    - **Organization:** All accessible organizations.
-    - **Scopes:** Custom defined -> Marketplace (Manage).
-    - **Copy the PAT!** You will need it in the next step.
+You can publish using the CLI (requires a PAT) or via the web portal (no PAT required).
 
-### 2. Create a Publisher
-- Go to the [Visual Studio Marketplace Management Portal](https://marketplace.visualstudio.com/manage).
-- Create a publisher with the ID `VirgilAdoleyine` (as defined in `package.json`).
+### Option A: Web Portal Upload (Recommended - No PAT Required)
 
-### 3. Login & Publish
-```bash
-# Login with your publisher ID and PAT
-vsce login VirgilAdoleyine
+1.  **Generate the Package:**
+    ```bash
+    npx vsce package
+    ```
+    This creates a `vibeflow-1.0.0.vsix` file in your project root.
+2.  **Go to the Management Portal:**
+    Open the [Visual Studio Marketplace Management Portal](https://marketplace.visualstudio.com/manage).
+3.  **Create/Select Publisher:**
+    Create a publisher with the ID `VirgilAdoleyine` if you haven't already.
+4.  **Upload:**
+    - Click on the **"New Extension"** button.
+    - Select **"Visual Studio Code"**.
+    - Drag and drop your `.vsix` file or browse to select it.
+    - Click **"Upload"**.
 
-# Package the extension into a .vsix file
-vsce package
+### Option B: CLI Publish (Requires PAT)
 
-# Publish to the marketplace
-vsce publish
-```
+1.  **Create a Personal Access Token (PAT):**
+    - Sign in to [Azure DevOps](https://dev.azure.com/).
+    - Create a PAT with **Organization:** "All accessible organizations" and **Scopes:** "Marketplace (Manage)".
+2.  **Login & Publish:**
+    ```bash
+    # Login with your publisher ID and PAT
+    npx vsce login VirgilAdoleyine
+
+    # Package and publish
+    npx vsce publish
+    ```
 
 ---
 
