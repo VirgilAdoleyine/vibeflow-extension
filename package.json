@@ -3,7 +3,7 @@
   "displayName": "VibeFlow — AI Workflow Builder",
   "description": "Describe workflows in plain English. AI builds, runs, and self-heals Python automation scripts. By Virgil Junior Adoleyine 🇬🇭",
   "version": "2.0.0",
-  "publisher": "VirgilAdoleyine",
+  "publisher": "vibeflow",
   "icon": "media/icon.png",
   "engines": { "vscode": "^1.85.0" },
   "categories": ["AI", "Machine Learning", "Other"],
