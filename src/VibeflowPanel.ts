@@ -30,6 +30,7 @@ export class VibeflowPanel {
         enableScripts: true,
         retainContextWhenHidden: true,
         localResourceRoots: [
+          context.extensionUri,
           vscode.Uri.joinPath(context.extensionUri, 'webview', 'dist'),
           vscode.Uri.joinPath(context.extensionUri, 'media')
         ]
@@ -133,8 +134,8 @@ export class VibeflowPanel {
         const files = await PythonGenerator.generate({
           workflow: this._currentWorkflow,
           config: Object.fromEntries(
-            ['openRouterKey','e2bApiKey','composioApiKey','inngestSigningKey','inngestEventKey',
-             'neonDatabaseUrl','upstashRedisUrl','upstashRedisToken'].map(k => [k, config.get<string>(k) || ''])
+            ['openRouterKey', 'e2bApiKey', 'composioApiKey', 'inngestSigningKey', 'inngestEventKey',
+              'neonDatabaseUrl', 'upstashRedisUrl', 'upstashRedisToken'].map(k => [k, config.get<string>(k) || ''])
           ),
           workspaceRoot: vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath
         });
@@ -188,19 +189,20 @@ export class VibeflowPanel {
     const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(distUri, 'assets', 'index.js'));
     const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(distUri, 'assets', 'index.css'));
     const nonce = getNonce();
+    const cspSource = webview.cspSource;
 
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src \${webview.cspSource} 'unsafe-inline'; script-src 'nonce-\${nonce}'; img-src \${webview.cspSource} data:; font-src \${webview.cspSource};">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}' ${cspSource}; img-src ${cspSource} data:; font-src ${cspSource}; connect-src ${cspSource} https:;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="\${styleUri}">
+  <link rel="stylesheet" href="${styleUri}">
   <title>VibeFlow</title>
 </head>
 <body>
   <div id="root"></div>
-  <script nonce="\${nonce}" src="\${scriptUri}"></script>
+  <script nonce="${nonce}" type="module" src="${scriptUri}"></script>
 </body>
 </html>`;
   }

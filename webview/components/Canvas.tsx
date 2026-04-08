@@ -32,9 +32,9 @@ export function Canvas({ nodes, edges, onNodesChange, onEdgesChange, onConnect, 
       </ReactFlow>
       {nodes.length === 0 && (
         <div style={styles.emptyCanvas}>
-          <div style={styles.emptyIcon}>⚡</div>
-          <div>Describe a workflow above to get started</div>
-          <div style={styles.emptyHint}>e.g. "Every morning summarize my Gmail and post to Slack"</div>
+          <div style={{ ...styles.emptyIcon, animation: 'pulse 2s infinite' }}>⚡</div>
+          <h2 style={{ color: 'var(--vscode-editor-foreground)', opacity: 0.9 }}>Ready for Liftoff</h2>
+          <p style={styles.emptyHint}>Type your automation goal in the command bar above.</p>
         </div>
       )}
     </div>

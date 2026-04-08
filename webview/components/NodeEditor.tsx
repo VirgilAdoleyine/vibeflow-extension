@@ -14,7 +14,7 @@ export function NodeEditor({ node, onSave, onClose }: Props) {
   }, [node]);
 
   const handleSave = () => {
-    onSave(node.id, { ...node.data, label });
+    onSave(node.id, { ...node.data, label, isEdited: true });
     onClose();
   };
 

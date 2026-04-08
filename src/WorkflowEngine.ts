@@ -47,8 +47,11 @@ Position nodes in a left-to-right DAG layout. x increments by 200 per node, y: 2
 
     let graph: WorkflowGraph;
     try {
-      const raw = plannerResponse.replace(/```json|```/g, '').trim();
-      graph = JSON.parse(raw);
+      // More robust extraction finding the first { and last }
+      const start = plannerResponse.indexOf('{');
+      const end = plannerResponse.lastIndexOf('}');
+      if (start === -1 || end === -1) throw new Error('No JSON found');
+      graph = JSON.parse(plannerResponse.substring(start, end + 1));
       graph.description = prompt;
     } catch {
       throw new Error('Planner failed to return valid JSON. Try rephrasing your workflow.');
@@ -74,7 +77,32 @@ Return ONLY the Python code, no markdown fences.`
           { role: 'user', content: `Write Python for this step: ${step}\n\nFull workflow context: ${JSON.stringify(graph)}` }
         ]
       });
-      scripts.push(script);
+
+      // REFLECTOR NODE — Self-healing logic
+      onStatus(`🕵️ Reflector: Auditing code for "${step}"...`, 'healer');
+      const reflection = await openRouterChat({
+        apiKey: openRouterKey,
+        model: 'anthropic/claude-sonnet-4-5',
+        messages: [
+          {
+            role: 'system',
+            content: `You are the Reflector node. Audit the provided Python code for:
+1. Missing imports.
+2. Environment variable usage (must use VIBEFLOW_ prefix).
+3. Logical errors.
+If errors exist, output the corrected code. If perfect, output 'PASS'.
+Return ONLY 'PASS' or the corrected code.`
+          },
+          { role: 'user', content: script }
+        ]
+      });
+
+      if (reflection.trim() === 'PASS') {
+        scripts.push(script);
+      } else {
+        onStatus(`✨ Reflector: Patched code for "${step}"`, 'healer');
+        scripts.push(reflection);
+      }
     }
 
     onStatus('✅ All steps generated. Formatting result...', 'formatter');
