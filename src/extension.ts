@@ -7,7 +7,7 @@ export function activate(context: vscode.ExtensionContext) {
     console.log('VibeFlow activated — AI Workflow Builder by Virgil Junior Adoleyine 🇬🇭');
 
     // Show welcome notification on first install
-    const hasShownWelcome = context.globalState.get('vibeflow.welcomeShown');
+    const hasShownWelcome = context.globalState.get('vibeflow-ext.welcomeShown');
     if (!hasShownWelcome) {
       vscode.window.showInformationMessage(
         '⚡ VibeFlow is ready! Describe a workflow in plain English and watch AI build it.',
@@ -15,17 +15,17 @@ export function activate(context: vscode.ExtensionContext) {
         'Star RegGuard ⭐'
       ).then(choice => {
         if (choice === 'Open VibeFlow') {
-          vscode.commands.executeCommand('vibeflow.open');
+          vscode.commands.executeCommand('vibeflow-ext.open');
         } else if (choice === 'Star RegGuard ⭐') {
           vscode.env.openExternal(vscode.Uri.parse('https://github.com/VirgilAdoleyine/regguard'));
         }
       });
-      context.globalState.update('vibeflow.welcomeShown', true);
+      context.globalState.update('vibeflow-ext.welcomeShown', true);
     }
 
     // Register all commands
     const commands = [
-      vscode.commands.registerCommand('vibeflow.open', () => {
+      vscode.commands.registerCommand('vibeflow-ext.open', () => {
         try {
           VibeflowPanel.createOrShow(context);
         } catch (e: any) {
@@ -33,7 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
       }),
 
-      vscode.commands.registerCommand('vibeflow.newWorkflow', async () => {
+      vscode.commands.registerCommand('vibeflow-ext.newWorkflow', async () => {
         const prompt = await vscode.window.showInputBox({
           prompt: 'Describe your workflow in plain English',
           placeHolder: 'e.g. Every morning, summarize my Gmail and post to Slack',
@@ -45,33 +45,33 @@ export function activate(context: vscode.ExtensionContext) {
         }
       }),
 
-      vscode.commands.registerCommand('vibeflow.searchModels', () => {
+      vscode.commands.registerCommand('vibeflow-ext.searchModels', () => {
         VibeflowPanel.createOrShow(context);
         VibeflowPanel.currentPanel?.sendCommand('searchModels');
       }),
 
-      vscode.commands.registerCommand('vibeflow.checkRegulations', () => {
+      vscode.commands.registerCommand('vibeflow-ext.checkRegulations', () => {
         VibeflowPanel.createOrShow(context);
         VibeflowPanel.currentPanel?.sendCommand('checkRegulations');
       }),
 
-      vscode.commands.registerCommand('vibeflow.generateFiles', () => {
+      vscode.commands.registerCommand('vibeflow-ext.generateFiles', () => {
         VibeflowPanel.createOrShow(context);
         VibeflowPanel.currentPanel?.sendCommand('generateFiles');
       }),
 
-      vscode.commands.registerCommand('vibeflow.syncRepos', async () => {
-        const config = vscode.workspace.getConfiguration('vibeflow');
+      vscode.commands.registerCommand('vibeflow-ext.syncRepos', async () => {
+        const config = vscode.workspace.getConfiguration('vibeflow-ext');
         const originUrl = config.get<string>('userGitHubRepo');
         const communityUrl = config.get<string>('communityGitRepo');
         if (!originUrl || !communityUrl) {
-          vscode.window.showWarningMessage('Set vibeflow.userGitHubRepo and vibeflow.communityGitRepo in settings first.');
+          vscode.window.showWarningMessage('Set vibeflow-ext.userGitHubRepo and vibeflow-ext.communityGitRepo in settings first.');
           return;
         }
         await GitHelper.syncBothRemotes(originUrl, communityUrl);
       }),
 
-      vscode.commands.registerCommand('vibeflow.contributeRegGuard', () => {
+      vscode.commands.registerCommand('vibeflow-ext.contributeRegGuard', () => {
         vscode.env.openExternal(vscode.Uri.parse('https://github.com/VirgilAdoleyine/regguard'));
         vscode.window.showInformationMessage(
           '⭐ Thank you! Star RegGuard and contribute to help devs ship compliant code faster.',

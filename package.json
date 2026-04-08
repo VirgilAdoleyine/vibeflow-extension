@@ -7,49 +7,49 @@
   "icon": "media/icon.png",
   "engines": { "vscode": "^1.85.0" },
   "categories": ["AI", "Machine Learning", "Other"],
-  "keywords": ["workflow", "automation", "ai", "claude", "gemini", "python", "langchain", "vibeflow"],
+  "keywords": ["workflow", "automation", "ai", "claude", "gemini", "python", "langchain", "vibeflow-ext"],
   "repository": {
     "type": "git",
-    "url": "https://github.com/VirgilAdoleyine/vibeflow-extension"
+    "url": "https://github.com/VirgilAdoleyine/vibeflow-ext-extension"
   },
-  "activationEvents": ["onCommand:vibeflow.open", "onStartupFinished"],
+  "activationEvents": ["onCommand:vibeflow-ext-ext.open", "onStartupFinished"],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "vibeflow.open",
+        "command": "vibeflow-ext.open",
         "title": "VibeFlow: Open Workflow Builder",
         "icon": "$(zap)"
       },
       {
-        "command": "vibeflow.newWorkflow",
+        "command": "vibeflow-ext.newWorkflow",
         "title": "VibeFlow: New Workflow from Prompt"
       },
       {
-        "command": "vibeflow.searchModels",
+        "command": "vibeflow-ext.searchModels",
         "title": "VibeFlow: Search Best AI Models for Task"
       },
       {
-        "command": "vibeflow.checkRegulations",
+        "command": "vibeflow-ext.checkRegulations",
         "title": "VibeFlow: Check Workflow Regulations"
       },
       {
-        "command": "vibeflow.generateFiles",
+        "command": "vibeflow-ext.generateFiles",
         "title": "VibeFlow: Generate .py + .env.local + README"
       },
       {
-        "command": "vibeflow.syncRepos",
+        "command": "vibeflow-ext.syncRepos",
         "title": "VibeFlow: Sync Cloud + Community Repos"
       },
       {
-        "command": "vibeflow.contributeRegGuard",
+        "command": "vibeflow-ext.contributeRegGuard",
         "title": "VibeFlow: Contribute to RegGuard ⭐"
       }
     ],
     "menus": {
       "editor/title": [
         {
-          "command": "vibeflow.open",
+          "command": "vibeflow-ext.open",
           "group": "navigation",
           "when": "resourceExtname == .py || resourceExtname == .ts"
         }
@@ -58,61 +58,61 @@
     "configuration": {
       "title": "VibeFlow",
       "properties": {
-        "vibeflow.openRouterKey": {
+        "vibeflow-ext.openRouterKey": {
           "type": "string",
           "description": "Your OpenRouter API key. Get one at openrouter.ai",
           "secret": true
         },
-        "vibeflow.defaultModel": {
+        "vibeflow-ext.defaultModel": {
           "type": "string",
           "default": "anthropic/claude-sonnet-4-5",
           "description": "Default AI model (searched via Perplexity)"
         },
-        "vibeflow.perplexityKey": {
+        "vibeflow-ext.perplexityKey": {
           "type": "string",
           "description": "Perplexity API key for model search + regulation scanning",
           "secret": true
         },
-        "vibeflow.e2bApiKey": {
+        "vibeflow-ext.e2bApiKey": {
           "type": "string",
           "description": "E2B sandbox API key",
           "secret": true
         },
-        "vibeflow.composioApiKey": {
+        "vibeflow-ext.composioApiKey": {
           "type": "string",
           "description": "Composio API key for 400+ OAuth integrations",
           "secret": true
         },
-        "vibeflow.inngestSigningKey": {
+        "vibeflow-ext.inngestSigningKey": {
           "type": "string",
           "description": "Inngest signing key",
           "secret": true
         },
-        "vibeflow.inngestEventKey": {
+        "vibeflow-ext.inngestEventKey": {
           "type": "string",
           "description": "Inngest event key",
           "secret": true
         },
-        "vibeflow.neonDatabaseUrl": {
+        "vibeflow-ext.neonDatabaseUrl": {
           "type": "string",
           "description": "Neon Postgres database URL",
           "secret": true
         },
-        "vibeflow.upstashRedisUrl": {
+        "vibeflow-ext.upstashRedisUrl": {
           "type": "string",
           "description": "Upstash Redis URL",
           "secret": true
         },
-        "vibeflow.upstashRedisToken": {
+        "vibeflow-ext.upstashRedisToken": {
           "type": "string",
           "description": "Upstash Redis token",
           "secret": true
         },
-        "vibeflow.userGitHubRepo": {
+        "vibeflow-ext.userGitHubRepo": {
           "type": "string",
           "description": "Your personal/cloud GitHub repo URL (origin)"
         },
-        "vibeflow.communityGitRepo": {
+        "vibeflow-ext.communityGitRepo": {
           "type": "string",
           "description": "VibeFlow community repo URL"
         }
