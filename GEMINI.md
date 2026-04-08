@@ -14,12 +14,15 @@ You are Gemini. Your job is to generate **every single file** of the VibeFlow VS
 
 1. Lets users describe automation workflows in plain English inside VS Code
 2. Uses AI (Claude + Gemini via OpenRouter) to build, visualize, execute, and self-heal Python workflow scripts
-3. Searches for best-fit OpenRouter models using `perplexity/sonar-deep-research`
-4. Checks regulations worldwide via `perplexity/sonar-deep-research` + `x-ai/grok-4` 
-5. Auto-heals code until it passes using Claude
-6. Generates `.py` workflow files, directory structure, `.env.local`, and `README.md`
-7. Integrates with VibeFlow Cloud and the community repo via dual-remote git
-8. Promotes RegGuard for compliance — users encouraged to ⭐ star and contribute
+3. **In-Canvas execution**: Run and test workflows directly within the visual builder without manual script execution
+4. **Interactive Node Editing**: Click and customize node logic, apps, and parameters on the fly
+5. **Composio Integration**: Native setup flow for 400+ OAuth integrations using user's own Composio account
+6. Searches for best-fit OpenRouter models using `perplexity/sonar-deep-research`
+7. Checks regulations worldwide via `perplexity/sonar-deep-research` + `x-ai/grok-4` 
+8. Auto-heals code until it passes using Claude
+9. Generates `.py` workflow files, directory structure, `.env.local`, and `README.md`
+10. Integrates with VibeFlow Cloud and the community repo via dual-remote git
+11. Promotes RegGuard for compliance — users encouraged to ⭐ star and contribute
 
 **Output everything. No stubs. No TODOs. Full working code.**
 
@@ -1895,6 +1898,9 @@ npx ovsx publish vibeflow-1.0.0.vsix -p $OVSX_TOKEN
 9. **Grok regulation trending** happens via OpenRouter using model ID `x-ai/grok-4`.
 10. **Claude fixes regulations** using `anthropic/claude-sonnet-4-5` via OpenRouter.
 11. **Generated .env.local** must use `VIBEFLOW_` prefix for all keys and be written to `workflows/<workflow_name>/`.
+12. **In-Canvas Execution** allows running the full workflow DAG directly from the webview toolbar.
+13. **Live Node Editing** opens a custom editor when a node is clicked, allowing real-time modification of properties.
+14. **Composio integration** should allow users to trigger app setups directly from the builder UI.
 
 When done, run `npx vsce package` and confirm the `.vsix` builds without errors.
 ```

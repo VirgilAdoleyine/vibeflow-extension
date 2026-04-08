@@ -39,6 +39,9 @@ VibeFlow is an AI-native VS Code extension designed to democratize automation by
 ### 🎨 Visual Node Canvas
 - **Technology:** Built with React Flow.
 - **Interaction:** Fully interactive canvas to visualize the AI's plan, adjust node positions, and monitor execution paths.
+- **In-Canvas Execution:** Run workflows directly from the extension UI with real-time status updates. No manual script running required.
+- **Live Node Editing:** Click any node to open a context-aware editor. Customize logic, app integrations, and parameters on the fly.
+- **Composio Integration:** Built-in shortcut to set up and manage 400+ third-party app connections.
 
 ### 📁 Production-Ready File Generation
 - **Automated Directory:** Creates `workflows/<workflow_name>_<timestamp>/`.

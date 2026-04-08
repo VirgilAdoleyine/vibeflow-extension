@@ -10,6 +10,9 @@
 
 - **Natural Language First** — Type what you want, AI builds it
 - **Visual Canvas** — React Flow node editor for power users
+- **In-Canvas Execution** — Run and test workflows directly without leaving the builder
+- **Live Node Editing** — Click and customize any node's logic or integration on the fly
+- **Composio Native Setup** — Link 400+ apps directly via the extension
 - **4-Node AI Agent** — Planner → Executor → Reflector (self-healer) → Formatter
 - **Infinite Self-Healing** — Code retries until fixed, or until you stop it
 - **Best Model Search** — Perplexity finds the right model for your task
