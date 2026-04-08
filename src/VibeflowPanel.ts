@@ -4,6 +4,7 @@ import { ModelSearcher } from './ModelSearcher';
 import { RegulationChecker } from './RegulationChecker';
 import { PythonGenerator } from './PythonGenerator';
 import { WorkflowGraph, VibeMessage } from './types';
+import { trackEvent } from './telemetry';
 
 export class VibeflowPanel {
   public static currentPanel: VibeflowPanel | undefined;
@@ -63,6 +64,7 @@ export class VibeflowPanel {
 
     switch (message.command) {
       case 'buildWorkflow': {
+        trackEvent('workflow_created');
         this._post({ command: 'status', text: '🧠 Planning workflow...', stage: 'planner' });
         try {
           const result = await WorkflowEngine.build({
@@ -92,16 +94,19 @@ export class VibeflowPanel {
       }
 
       case 'checkRegulations': {
+        trackEvent('compliance_check_started');
         this._post({ command: 'status', text: '📋 Scanning global regulations...', stage: 'regulation' });
         const regulations = await RegulationChecker.scan({
           task: message.prompt || (this._currentWorkflow?.description || ''),
           openRouterKey
         });
         this._post({ command: 'regulationsFound', regulations });
+        trackEvent('compliance_check_completed');
         break;
       }
 
       case 'runWorkflow': {
+        trackEvent('workflow_run_started');
         this._post({ command: 'status', text: '🚀 Starting execution...', stage: 'executor' });
         // In a real scenario, this would use E2B or a local child process.
         // For now, we simulate execution and provide feedback.
@@ -113,19 +118,23 @@ export class VibeflowPanel {
           }
           this._post({ command: 'status', text: '✅ Execution complete!', stage: 'complete' });
           this._post({ command: 'executionFinished', success: true });
+          trackEvent('workflow_run_success');
         } catch (e: any) {
+          trackEvent('workflow_run_failed', { error: e.message });
           this._post({ command: 'error', text: e.message });
         }
         break;
       }
 
       case 'setupComposio': {
+        trackEvent('composio_setup_clicked');
         vscode.window.showInformationMessage('Opening Composio App Setup...');
         vscode.env.openExternal(vscode.Uri.parse('https://app.composio.dev/apps'));
         break;
       }
 
       case 'generateFiles': {
+        trackEvent('files_generated');
         if (!this._currentWorkflow) {
           this._post({ command: 'error', text: 'Build a workflow first before generating files.' });
           return;

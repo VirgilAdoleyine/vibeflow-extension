@@ -2,17 +2,36 @@
   "name": "vibeflow-orch",
   "displayName": "VibeFlow Orch — AI Workflow Builder",
   "description": "Describe workflows in plain English. AI builds, runs, and self-heals Python automation scripts. By Virgil Junior Adoleyine 🇬🇭",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "publisher": "vibeflow",
   "icon": "media/icon.png",
-  "engines": { "vscode": "^1.85.0" },
-  "categories": ["AI", "Machine Learning", "Other"],
-  "keywords": ["workflow", "automation", "ai", "claude", "gemini", "python", "langchain", "vibeflow-orch", "orchestration"],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "AI",
+    "Machine Learning",
+    "Other"
+  ],
+  "keywords": [
+    "workflow",
+    "automation",
+    "ai",
+    "claude",
+    "gemini",
+    "python",
+    "langchain",
+    "vibeflow-orch",
+    "orchestration"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/VirgilAdoleyine/vibeflow-orchension"
   },
-  "activationEvents": ["onCommand:vibeflow-orch.open", "onStartupFinished"],
+  "activationEvents": [
+    "onCommand:vibeflow-orch.open",
+    "onStartupFinished"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
@@ -132,6 +151,7 @@
     "@langchain/openai": "^0.3.0",
     "langchain": "^0.3.0",
     "node-fetch": "^3.3.2",
+    "posthog-node": "^5.29.1",
     "simple-git": "^3.22.0"
   },
   "devDependencies": {
@@ -139,7 +159,7 @@
     "@types/vscode": "^1.85.0",
     "@vscode/vsce": "^2.24.0",
     "esbuild": "^0.20.0",
-    "typescript": "^5.3.0",
-    "ovsx": "^0.9.0"
+    "ovsx": "^0.9.0",
+    "typescript": "^5.3.0"
   }
 }

@@ -1,9 +1,11 @@
 import * as vscode from 'vscode';
 import { VibeflowPanel } from './VibeflowPanel';
 import { GitHelper } from './GitHelper';
+import { trackEvent, shutdownTelemetry } from './telemetry';
 
 export function activate(context: vscode.ExtensionContext) {
   try {
+    trackEvent('extension_activated');
     console.log('VibeFlow activated — AI Workflow Builder by Virgil Junior Adoleyine 🇬🇭');
 
     // Show welcome notification on first install
@@ -27,6 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
     const commands = [
       vscode.commands.registerCommand('vibeflow-orch.open', () => {
         try {
+          trackEvent('workflow_builder_opened');
           VibeflowPanel.createOrShow(context);
         } catch (e: any) {
           vscode.window.showErrorMessage(`Failed to open VibeFlow: ${e.message}`);
@@ -88,4 +91,6 @@ export function activate(context: vscode.ExtensionContext) {
   }
 }
 
-export function deactivate() { }
+export async function deactivate() {
+  await shutdownTelemetry();
+}
