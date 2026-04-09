@@ -46,7 +46,7 @@ Return ONLY a valid JSON array. No prose.`
     try {
       const grokText = await openRouterChat({
         apiKey: openRouterKey,
-        model: 'x-ai/grok-4',
+        model: 'x-ai/grok-4.20',
         messages: [{
           role: 'user',
           content: `What are the TRENDING or NEW regulations in 2024-2025 that affect this workflow: "${task}"?

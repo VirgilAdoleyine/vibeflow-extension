@@ -325,6 +325,7 @@ python-dotenv
       fs.mkdirSync(baseDir, { recursive: true });
       fs.writeFileSync(path.join(baseDir, 'agent.py'), pythonContent, 'utf8');
       fs.writeFileSync(path.join(baseDir, '.env.local'), envContent, 'utf8');
+      fs.writeFileSync(path.join(baseDir, '.env.vibeflow'), envContent, 'utf8');
       fs.writeFileSync(path.join(baseDir, 'README.md'), readmeContent, 'utf8');
       fs.writeFileSync(path.join(baseDir, 'requirements.txt'), requirementsContent, 'utf8');
       for (let i = 0; i < stepFiles.length; i++) {

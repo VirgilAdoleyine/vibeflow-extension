@@ -5,6 +5,7 @@ import { trackEvent } from './telemetry';
 interface RunOptions {
   code: string;
   e2bApiKey: string;
+  envs?: Record<string, string>;
   onOutput?: (text: string) => void;
   onError?: (text: string) => void;
 }
@@ -13,7 +14,7 @@ export class E2BRunner {
   private static sandbox: Sandbox | null = null;
 
   static async runCode(options: RunOptions): Promise<string> {
-    const { code, e2bApiKey, onOutput, onError } = options;
+    const { code, e2bApiKey, envs, onOutput, onError } = options;
 
     if (!e2bApiKey) {
       throw new Error('E2B API key not set. Set vibeflow-orch.e2bApiKey in VS Code Settings.');
@@ -34,7 +35,7 @@ export class E2BRunner {
         }
       });
 
-      const exit = await sandbox.process.exec(['python3', '-c', code]);
+      const exit = await sandbox.process.exec(['python3', '-c', code], { env: envs });
       const output = exit.stdout + exit.stderr;
 
       await sandbox.close();
@@ -50,6 +51,7 @@ export class E2BRunner {
   static async runWorkflowFiles(
     dirPath: string, 
     e2bApiKey: string,
+    envs?: Record<string, string>,
     onOutput?: (text: string) => void,
     onError?: (text: string) => void
   ): Promise<string> {
@@ -79,7 +81,7 @@ export class E2BRunner {
       const exit = await sandbox.process.exec([
         'bash', '-c', 
         'cd /home/user/workflow && pip install -r requirements.txt 2>/dev/null && python3 agent.py'
-      ]);
+      ], { env: envs });
 
       const output = exit.stdout + exit.stderr;
       await sandbox.close();

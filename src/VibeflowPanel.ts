@@ -12,6 +12,7 @@ export class VibeflowPanel {
   private readonly _panel: vscode.WebviewPanel;
   private readonly _context: vscode.ExtensionContext;
   private _currentWorkflow: WorkflowGraph | null = null;
+  private _isExecuting = false;
   private _disposables: vscode.Disposable[] = [];
 
   public static createOrShow(context: vscode.ExtensionContext) {
@@ -71,6 +72,9 @@ export class VibeflowPanel {
           const result = await WorkflowEngine.build({
             prompt: message.prompt!,
             openRouterKey,
+            neonUrl: config.get<string>('neonDatabaseUrl'),
+            upstashUrl: config.get<string>('upstashRedisUrl'),
+            upstashToken: config.get<string>('upstashRedisToken'),
             onStatus: (text, stage) => this._post({ command: 'status', text, stage }),
             onWorkflow: (graph) => {
               this._currentWorkflow = graph;
@@ -80,6 +84,24 @@ export class VibeflowPanel {
           this._post({ command: 'workflowComplete', result });
         } catch (e: any) {
           this._post({ command: 'error', text: e.message });
+        }
+        break;
+      }
+
+      case 'getComposioApps': {
+        const apiKey = config.get<string>('composioApiKey');
+        if (!apiKey) {
+          this._post({ command: 'composioApps', apps: [] });
+          return;
+        }
+        try {
+          const res = await fetch('https://api.composio.dev/v1/apps', {
+            headers: { 'x-api-key': apiKey }
+          });
+          const data: any = await res.json();
+          this._post({ command: 'composioApps', apps: data.items || [] });
+        } catch {
+          this._post({ command: 'composioApps', apps: [] });
         }
         break;
       }
@@ -106,101 +128,137 @@ export class VibeflowPanel {
         break;
       }
 
+      case 'stopExecution': {
+        this._isExecuting = false;
+        this._post({ command: 'status', text: '🛑 Execution stopped by user.', stage: 'error' });
+        break;
+      }
+
       case 'runWorkflow': {
+        if (this._isExecuting) return;
+        this._isExecuting = true;
         trackEvent('workflow_run_started');
         this._post({ command: 'status', text: '🚀 Starting execution on E2B...', stage: 'executor' });
         const e2bApiKey = config.get<string>('e2bApiKey') || '';
         
         if (!e2bApiKey) {
+          this._isExecuting = false;
           this._post({ command: 'error', text: 'E2B API key not set. Set vibeflow-orch.e2bApiKey in VS Code Settings.' });
           return;
         }
+
+        const workflowToRun = message.workflow || this._currentWorkflow;
         
-        if (!this._currentWorkflow?.nodes?.length) {
-          this._post({ command: 'error', text: 'No workflow built. Build a workflow first.' });
+        if (!workflowToRun?.nodes?.length) {
+          this._isExecuting = false;
+          this._post({ command: 'error', text: 'No workflow data. Build or select a workflow first.' });
           return;
         }
+
+        // Update current workflow in case it was edited in the UI
+        this._currentWorkflow = workflowToRun;
         
         try {
+          // Prepare base env vars from settings
+          const baseEnvs: Record<string, string> = {};
+          const allConfig = config.get<Record<string, any>>('') || {};
+          for (const key of Object.keys(allConfig)) {
+            if (typeof allConfig[key] === 'string') {
+              baseEnvs[`VIBEFLOW_${key.toUpperCase()}`] = allConfig[key];
+            }
+          }
+
           // Run each node's code on E2B in order
-          const nodes = this._currentWorkflow.nodes;
+          const nodes = workflowToRun.nodes;
           
           for (let i = 0; i < nodes.length; i++) {
+            if (!this._isExecuting) break;
             const node = nodes[i];
-            this._post({ command: 'status', text: `🏃 Running node ${i + 1}/${nodes.length}: ${node.label}`, stage: 'executor' });
             
             if (!node.code) {
               this._post({ command: 'status', text: `⚠️ Node "${node.label}" has no code. Skipping.`, stage: 'executor' });
               continue;
             }
+
+            // Merge node-specific config into envs
+            const nodeEnvs = { ...baseEnvs };
+            if (node.config) {
+              for (const [key, value] of Object.entries(node.config)) {
+                nodeEnvs[`VIBEFLOW_${key.toUpperCase()}`] = String(value);
+              }
+            }
             
-            let maxAttempts = 5;
             let attempt = 0;
             let success = false;
             let lastError = '';
             
-            // Self-healing loop
-            while (attempt < maxAttempts && !success) {
+            // Truly Infinite Self-healing loop until success or stop
+            while (!success && this._isExecuting) {
               attempt++;
+              this._post({ command: 'status', text: `🏃 Running node ${i + 1}/${nodes.length}: ${node.label} (Attempt ${attempt})`, stage: 'executor' });
               
               try {
-                const output = await E2BRunner.runCode({
+                await E2BRunner.runCode({
                   code: node.code,
                   e2bApiKey,
+                  envs: nodeEnvs,
                   onOutput: (text) => this._post({ command: 'status', text: text, stage: 'executor' }),
-                  onError: (text) => { lastError = text; throw new Error(text); }
+                  onError: (text) => { lastError = text; }
                 });
                 
+                if (lastError && (lastError.toLowerCase().includes('traceback') || lastError.toLowerCase().includes('error'))) {
+                    throw new Error(lastError);
+                }
+
                 success = true;
                 this._post({ command: 'status', text: `✅ Node "${node.label}" completed`, stage: 'executor' });
                 trackEvent('node_execution_success', { nodeId: node.id, nodeLabel: node.label });
                 
               } catch (execError: any) {
-                lastError = execError.message;
+                lastError = lastError || execError.message;
                 this._post({ command: 'status', text: `❌ Node "${node.label}" failed: ${lastError}`, stage: 'executor' });
-                this._post({ command: 'status', text: `🩺 Self-healing... attempt ${attempt}/${maxAttempts}`, stage: 'healer' });
+                this._post({ command: 'status', text: `🩺 Self-healing indefinitely... (Attempt ${attempt})`, stage: 'healer' });
                 
                 // Try to heal the code
                 const healedCode = await WorkflowEngine.selfHeal(
                   node.code,
                   lastError,
                   openRouterKey,
-                  3,
-                  (t, s, a) => this._post({ command: 'status', text: t, stage: s })
+                  1, 
+                  (t, s) => this._post({ command: 'status', text: t, stage: s })
                 );
                 
                 node.code = healedCode;
                 this._post({ command: 'nodeCodeUpdated', nodeId: node.id, code: healedCode });
-                
-                if (attempt >= maxAttempts) {
-                  throw new Error(`Node "${node.label}" failed after ${maxAttempts} healing attempts. Last error: ${lastError}`);
-                }
+                lastError = ''; 
               }
             }
           }
           
-          this._post({ command: 'status', text: '✅ All nodes executed successfully!', stage: 'complete' });
+          if (this._isExecuting) {
+            this._post({ command: 'status', text: '✅ All nodes executed successfully!', stage: 'complete' });
+          }
+          this._isExecuting = false;
           this._post({ command: 'executionFinished', success: true });
           trackEvent('workflow_run_success');
         } catch (e: any) {
+          this._isExecuting = false;
           trackEvent('workflow_run_failed', { error: e.message });
           this._post({ command: 'error', text: e.message });
         }
         break;
       }
 
-      case 'updateNodeCode': {
-        // Update a node's code when user edits it in the canvas
-        if (!message.nodeId || !message.code) {
-          this._post({ command: 'error', text: 'Missing nodeId or code.' });
-          return;
-        }
+      case 'updateNodeData': {
+        // Update a node's data when user edits it in the webview
+        if (!message.nodeId) return;
         
         const node = this._currentWorkflow?.nodes.find(n => n.id === message.nodeId);
         if (node) {
-          node.code = message.code;
-          this._post({ command: 'nodeCodeUpdated', nodeId: message.nodeId, code: message.code });
-          this._post({ command: 'status', text: `💾 Code saved for node "${node.label}"`, stage: 'save' });
+          if (message.label) node.label = message.label;
+          if (message.code) node.code = message.code;
+          if (message.config) node.config = message.config;
+          this._post({ command: 'status', text: `💾 Node "${node.label}" updated`, stage: 'save' });
         }
         break;
       }
@@ -335,6 +393,8 @@ export class VibeflowPanel {
     const nonce = getNonce();
     const cspSource = webview.cspSource;
 
+    // We use a simplified CSP and load the script as a module
+    // This is more robust for different VS Code forks (like "antigravity" or Cursor)
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -344,9 +404,9 @@ export class VibeflowPanel {
   <link rel="stylesheet" href="${styleUri}">
   <title>VibeFlow</title>
 </head>
-<body>
+<body style="padding: 0; margin: 0; overflow: hidden;">
   <div id="root"></div>
-  <script nonce="${nonce}" type="module" src="${scriptUri}"></script>
+  <script nonce="${nonce}" type="module" crossorigin src="${scriptUri}"></script>
 </body>
 </html>`;
   }

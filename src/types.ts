@@ -24,10 +24,13 @@ export interface VibeMessage {
   command: string;
   prompt?: string;
   code?: string;
+  config?: Record<string, any>;
+  label?: string;
   error?: string;
   url?: string;
   text?: string;
   workflow?: WorkflowGraph;
   dirPath?: string;
   nodeId?: string;
+  stage?: string;
 }

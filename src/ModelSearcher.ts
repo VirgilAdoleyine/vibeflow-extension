@@ -21,20 +21,27 @@ export class ModelSearcher {
     try {
       const text = await openRouterChat({
         apiKey: openRouterKey,
-        model: 'perplexity/sonar-deep-research',
+        model: 'perplexity/sonar-reasoning-pro',
         messages: [
           {
             role: 'user',
-            content: `Search OpenRouter's model catalog and list the TOP 5 most appropriate AI models for this task: "${task}".
+            content: `Perform a deep research search on OpenRouter's model catalog to find the absolute TOP 5 AI models for this specific automation task: "${task}".
+
+Analyze based on:
+1. Coding proficiency (Python 3.11+)
+2. Tool use and function calling accuracy
+3. Latency vs reasoning depth
+4. Context window requirements
 
 For each model return:
-- OpenRouter model ID (exact slug like "anthropic/claude-sonnet-4-5")
-- Provider name
-- Key strengths for this task
-- Whether it's the top recommendation
+- id: OpenRouter model ID (exact slug)
+- name: Human-friendly name
+- provider: Provider name (e.g., Anthropic, Google, Meta)
+- strengths: Array of 3 specific reasons why it fits THIS task
+- recommended: true for the #1 best fit
+- openRouterSlug: Same as ID
 
-Return ONLY valid JSON array:
-[{"id":"...", "name":"...", "provider":"...", "strengths":["..."], "recommended":true/false, "openRouterSlug":"..."}]`
+Return ONLY a valid JSON array.`
           }
         ]
       });
