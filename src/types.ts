@@ -4,6 +4,7 @@ export interface WorkflowNode {
   label: string;
   app?: string;
   config?: Record<string, any>;
+  code?: string;
   position: { x: number; y: number };
 }
 
@@ -27,4 +28,6 @@ export interface VibeMessage {
   url?: string;
   text?: string;
   workflow?: WorkflowGraph;
+  dirPath?: string;
+  nodeId?: string;
 }

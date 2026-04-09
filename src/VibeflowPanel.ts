@@ -3,6 +3,7 @@ import { WorkflowEngine } from './WorkflowEngine';
 import { ModelSearcher } from './ModelSearcher';
 import { RegulationChecker } from './RegulationChecker';
 import { PythonGenerator } from './PythonGenerator';
+import { E2BRunner } from './E2BRunner';
 import { WorkflowGraph, VibeMessage } from './types';
 import { trackEvent } from './telemetry';
 
@@ -107,21 +108,113 @@ export class VibeflowPanel {
 
       case 'runWorkflow': {
         trackEvent('workflow_run_started');
-        this._post({ command: 'status', text: '🚀 Starting execution...', stage: 'executor' });
-        // In a real scenario, this would use E2B or a local child process.
-        // For now, we simulate execution and provide feedback.
+        this._post({ command: 'status', text: '🚀 Starting execution on E2B...', stage: 'executor' });
+        const e2bApiKey = config.get<string>('e2bApiKey') || '';
+        
+        if (!e2bApiKey) {
+          this._post({ command: 'error', text: 'E2B API key not set. Set vibeflow-orch.e2bApiKey in VS Code Settings.' });
+          return;
+        }
+        
+        if (!this._currentWorkflow?.nodes?.length) {
+          this._post({ command: 'error', text: 'No workflow built. Build a workflow first.' });
+          return;
+        }
+        
         try {
-          if (!message.workflow?.steps) throw new Error('No steps to run.');
-          for (const step of message.workflow.steps) {
-            this._post({ command: 'status', text: `🏃 Running: ${step}`, stage: 'executor' });
-            await new Promise(r => setTimeout(r, 1500)); // Simulate work
+          // Run each node's code on E2B in order
+          const nodes = this._currentWorkflow.nodes;
+          
+          for (let i = 0; i < nodes.length; i++) {
+            const node = nodes[i];
+            this._post({ command: 'status', text: `🏃 Running node ${i + 1}/${nodes.length}: ${node.label}`, stage: 'executor' });
+            
+            if (!node.code) {
+              this._post({ command: 'status', text: `⚠️ Node "${node.label}" has no code. Skipping.`, stage: 'executor' });
+              continue;
+            }
+            
+            let maxAttempts = 5;
+            let attempt = 0;
+            let success = false;
+            let lastError = '';
+            
+            // Self-healing loop
+            while (attempt < maxAttempts && !success) {
+              attempt++;
+              
+              try {
+                const output = await E2BRunner.runCode({
+                  code: node.code,
+                  e2bApiKey,
+                  onOutput: (text) => this._post({ command: 'status', text: text, stage: 'executor' }),
+                  onError: (text) => { lastError = text; throw new Error(text); }
+                });
+                
+                success = true;
+                this._post({ command: 'status', text: `✅ Node "${node.label}" completed`, stage: 'executor' });
+                trackEvent('node_execution_success', { nodeId: node.id, nodeLabel: node.label });
+                
+              } catch (execError: any) {
+                lastError = execError.message;
+                this._post({ command: 'status', text: `❌ Node "${node.label}" failed: ${lastError}`, stage: 'executor' });
+                this._post({ command: 'status', text: `🩺 Self-healing... attempt ${attempt}/${maxAttempts}`, stage: 'healer' });
+                
+                // Try to heal the code
+                const healedCode = await WorkflowEngine.selfHeal(
+                  node.code,
+                  lastError,
+                  openRouterKey,
+                  3,
+                  (t, s, a) => this._post({ command: 'status', text: t, stage: s })
+                );
+                
+                node.code = healedCode;
+                this._post({ command: 'nodeCodeUpdated', nodeId: node.id, code: healedCode });
+                
+                if (attempt >= maxAttempts) {
+                  throw new Error(`Node "${node.label}" failed after ${maxAttempts} healing attempts. Last error: ${lastError}`);
+                }
+              }
+            }
           }
-          this._post({ command: 'status', text: '✅ Execution complete!', stage: 'complete' });
+          
+          this._post({ command: 'status', text: '✅ All nodes executed successfully!', stage: 'complete' });
           this._post({ command: 'executionFinished', success: true });
           trackEvent('workflow_run_success');
         } catch (e: any) {
           trackEvent('workflow_run_failed', { error: e.message });
           this._post({ command: 'error', text: e.message });
+        }
+        break;
+      }
+
+      case 'updateNodeCode': {
+        // Update a node's code when user edits it in the canvas
+        if (!message.nodeId || !message.code) {
+          this._post({ command: 'error', text: 'Missing nodeId or code.' });
+          return;
+        }
+        
+        const node = this._currentWorkflow?.nodes.find(n => n.id === message.nodeId);
+        if (node) {
+          node.code = message.code;
+          this._post({ command: 'nodeCodeUpdated', nodeId: message.nodeId, code: message.code });
+          this._post({ command: 'status', text: `💾 Code saved for node "${node.label}"`, stage: 'save' });
+        }
+        break;
+      }
+
+      case 'getNodeCode': {
+        // Get code for a specific node
+        if (!message.nodeId) {
+          this._post({ command: 'error', text: 'Missing nodeId.' });
+          return;
+        }
+        
+        const node = this._currentWorkflow?.nodes.find(n => n.id === message.nodeId);
+        if (node) {
+          this._post({ command: 'nodeCodeResponse', nodeId: message.nodeId, code: node.code || '', label: node.label });
         }
         break;
       }
@@ -140,15 +233,57 @@ export class VibeflowPanel {
           return;
         }
         this._post({ command: 'status', text: '📁 Generating .py + .env.local + README...', stage: 'generate' });
+        
+        // Get all config including user-provided env vars
+        const allConfigKeys = Object.keys(config).filter(k => k.startsWith('vibeflow-orch.'));
+        const allConfig: Record<string, string> = {};
+        for (const key of allConfigKeys) {
+          allConfig[key.replace('vibeflow-orch.', '')] = config.get<string>(key) || '';
+        }
+        // Also include any custom env vars the user wants to pass
+        const customEnvVars = config.get<string>('customEnvVars') || '';
+        
         const files = await PythonGenerator.generate({
           workflow: this._currentWorkflow,
-          config: Object.fromEntries(
-            ['openRouterKey', 'e2bApiKey', 'composioApiKey', 'inngestSigningKey', 'inngestEventKey',
-              'neonDatabaseUrl', 'upstashRedisUrl', 'upstashRedisToken'].map(k => [k, config.get<string>(k) || ''])
-          ),
+          config: allConfig,
+          customEnvVars: customEnvVars,
           workspaceRoot: vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath
         });
         this._post({ command: 'filesGenerated', files });
+        break;
+      }
+
+      case 'runWorkflowFiles': {
+        trackEvent('e2b_workflow_files_started');
+        const e2bApiKey = config.get<string>('e2bApiKey') || '';
+        
+        if (!e2bApiKey) {
+          this._post({ command: 'error', text: 'E2B API key not set. Set vibeflow-orch.e2bApiKey in VS Code Settings.' });
+          return;
+        }
+        
+        if (!message.dirPath) {
+          this._post({ command: 'error', text: 'No workflow directory provided.' });
+          return;
+        }
+        
+        this._post({ command: 'status', text: '🚀 Running workflow files on E2B...', stage: 'executor' });
+        
+        try {
+          const output = await E2BRunner.runWorkflowFiles(
+            message.dirPath,
+            e2bApiKey,
+            (text) => this._post({ command: 'status', text, stage: 'executor' }),
+            (text) => this._post({ command: 'status', text: `Error: ${text}`, stage: 'executor' })
+          );
+          
+          this._post({ command: 'status', text: '✅ Workflow execution complete!', stage: 'complete' });
+          this._post({ command: 'executionFinished', success: true, output });
+          trackEvent('e2b_workflow_files_success');
+        } catch (e: any) {
+          trackEvent('e2b_workflow_files_failed', { error: e.message });
+          this._post({ command: 'error', text: e.message });
+        }
         break;
       }
 

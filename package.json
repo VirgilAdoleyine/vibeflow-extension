@@ -2,7 +2,7 @@
   "name": "vibeflow-orch",
   "displayName": "VibeFlow Orch — AI Workflow Builder",
   "description": "Describe workflows in plain English. AI builds, runs, and self-heals Python automation scripts. By Virgil Junior Adoleyine 🇬🇭",
-  "version": "2.0.4",
+  "version": "2.0.8",
   "publisher": "vibeflow",
   "icon": "media/icon.png",
   "engines": {
@@ -134,6 +134,10 @@
         "vibeflow-orch.communityGitRepo": {
           "type": "string",
           "description": "VibeFlow community repo URL"
+        },
+        "vibeflow-orch.customEnvVars": {
+          "type": "string",
+          "description": "Custom environment variable names (comma-separated) to include in generated .env files"
         }
       }
     }
@@ -149,6 +153,7 @@
   },
   "dependencies": {
     "@langchain/openai": "^0.3.0",
+    "e2b": "^2.19.0",
     "langchain": "^0.3.0",
     "node-fetch": "^3.3.2",
     "posthog-node": "^5.29.1",
